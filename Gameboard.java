@@ -1,200 +1,323 @@
-package org.example;
+package main;
 
 import java.util.ArrayList;
-import java.lang.Math;
-
-public class Gameboard {
-    int[][] gb = new int[6][7];
-
-    /**
-     * marks which player is currently playing.
-     * 1 for player 1, 2 for player 2
-     */
-    private int turnMarker = 1;
-
-    private int chainLeft = 1;
-    private int chainRight = 1;
-
-    public int getTurnMarker(){
-        return turnMarker;
-    }
-
-    /**
-     * Move method: places a piece in the array at the coordinates of [y][x] and then checks if resulting play was
-     * a winning move.
-     * @param x
-     * @return -1 if no win condition is found, otherwise returns the number of the winning player.
-     */
-    public int move(int x){
-        int y = 0;
-        //placing the piece in the array
-        {
-            for (int i = gb.length - 1; i >= 0; i--) {
-                if (gb[i][x] == 0) {
-                    gb[i][x] = turnMarker;
-                    y = i;
-                    break;
-                }
-            }
-
-        }
-
-        if (turnMarker == 2){
-            turnMarker = 1;
-        } else {
-            turnMarker = 2;
-        }
-
-        return winCheck(y, x);
-    }
 
 
-    public int winCheck(int y, int x){
-        if (checkDiagonalUpper(y, x)){
-            return turnMarker;
-        };
-        if (checkDiagonalLower(y, x)){
-            return turnMarker;
-        };
-        if (checkHorizontal(y, x)){
-            return turnMarker;
-        };
-        if (checkVertical(y, x)){
-            return turnMarker;
-        };
+/**
+ * Gameboard class for the model of a Connect4 game
+ * @author Weston Minshull
+ * @author Owen Clinton
+ */
+public class Gameboard{
 
-        return -1;
-    }
+	/** Internal array of the gameboard */
+	private int[][] gb;
 
-    /**
-     * checks the two upper diagonal win conditions, y and x are the starting point for the win checking.
-     * It should be the coordinates of the last piece that was played.
-     * @param y is the rows of the array
-     * @param x is the rows of the array
-     * @return true if there are 4 in a row, or false if not
-     */
-    public boolean checkDiagonalUpper(int y, int x){
-        for (int i = y+1; i <= y + 3; i++){
-            for (int j = x+1; j <= x + 3; j++){
+	/** Number of rows in the gameboard */
+	final int rows = 6;
 
-                //checks array index up and to the right
-                if (isValidMove(i,j) && gb[i][j] == turnMarker){
-                    chainRight++;
-                }
-                //checks array index up and to the left
-                if (isValidMove(i, -j) && gb[i][-j] == turnMarker){
-                    chainLeft++;
-                }
+	/** Number of columns in the gameboard */
+	final int cols = 7;
 
-                //checks if win condition is met
-                if (chainLeft >= 4 || chainRight >= 4){
-                    return true;
-                }
+	/** Keeps track of the last Move object executed on the gameboard for easy undoing */
+	private Move lastMove;
 
-            }
-        }
-        chainRight = 1;
-        chainLeft = 1;
-        return false;
-    }
-    /**
-     * checks the two lower diagonal win conditions, y and x are the starting point for the win checking.
-     * It should be the coordinates of the last piece that was played.
-     * @param y is the rows of the array
-     * @param x is the cols of the array
-     * @return true if there are 4 in a row, or false if not
-     */
-    public boolean checkDiagonalLower(int y, int x){
-        for (int i = y+1; i <= y + 3; i++){
-            for (int j = x+1; j <= x + 3; j++){
+	/** Indicates whose turn it is (1 for player 1, 2 for player 2) */
+	private int turn;
 
-                //checks array index down and to the right
-                if (isValidMove(-i, j) && gb[-i][j] == turnMarker){
-                    chainRight++;
-                }
-                //checks array index up and to the left
-                if (isValidMove(-i, -j) && gb[-i][-j] == turnMarker){
-                    chainLeft++;
-                }
+	/** Indicates if a winner has been found (true) otherwise false */
+	private boolean winnerFound;
 
-                //checks if win condition is met
-                if (chainLeft >= 4 || chainRight >= 4){
-                    return true;
-                }
+	/** Integer that keeps track of total number of moves on gameboard to determine a tie */
+	private int totalMoves;
 
-            }
-        }
-        chainRight = 1;
-        chainLeft = 1;
-        return false;
-    }
+	/** The AIPlayer instance for the gameboard */
+	private AIPlayer ai;
+	public Gameboard() {
+		turn = 1;
+		winnerFound = false;
+		gb = new int[rows][cols];
+		totalMoves = 0;
+		ai = new AIPlayer(this);
+		lastMove = new Move(0,0);
+	}
 
-    public boolean checkHorizontal(int y, int x){
-        for (int i = x+1; i <= x + 3; i++){
+	/**
+	 * Returns whose turn it is, 1 for player one, 2 for player two, 3 for a tie
+	 * @return integer containing the turn number
+	 */
+	public int getTurn() {
+		return this.turn;
+	}
 
-            //checks array index to the right
-            if (isValidMove(y, i) && gb[y][i] == turnMarker){
-                chainRight++;
-            }
+	/**
+	 * Sets which player's turn it is. 1 for player 1, 2 for player 2
+	 * @param turn which player's turn you would like it to be.
+	 */
+	public void setTurn(int turn){
+		this.turn = turn;
+	}
 
-            //checks array index to the left
-            if (isValidMove(y , -i) && gb[y][-i] == turnMarker){
-                chainLeft++;
-            }
-        }
+	/**
+	 * Gets the gameboard 2D array
+	 * @return gameboard as a 2D Array
+	 */
+	public int[][] getBoard(){
+		return this.gb;
+	}
 
-        //checks if win condition is met
-        if (chainLeft >= 4 || chainRight >= 4){
-            return true;
-        }
+	/**
+	 * Gets the last move executed on the gameboard.
+	 * @return Move object with coordinates of last move on gameboard.
+	 */
+	public Move getLastMove(){ return this.lastMove;}
 
-        chainRight = 1;
-        chainLeft = 1;
-        return false;
-    }
+	/**
+	 * Checks if a winner has been found
+	 * @return true if a winner has been found, false otherwise
+	 */
+	public boolean winnerFound() {
+		return winnerFound;
+	}
 
-    public boolean checkVertical(int y, int x){
-        for (int i = y - 1; i <= y - 3; i++){
+	/**
+	 * Helper function for win checking that returns the piece at the desired location
+	 * from the array. Returns -1 if the piece does not exist (invalid index)
+	 * @param col the column
+	 * @param row the row
+	 * @return the piece occupying a space or -1 if invalid index
+	 */
+	private int getPiece(int col, int row) {
+		if(col<0 || col>gb[0].length-1 || row<0 || row>gb.length-1) {
+			return -1;//return -1 for the invalid index, this will compare to be unequal always
+		}
 
-            //checks array index below
-            if (isValidMove(i, x) && gb[i][x] == turnMarker){
-                chainLeft++;
-            }
-        }
+		return gb[row][col];//return what is occupying the valid space
+	}
 
-        //checks if win condition is met
-        if (chainLeft >= 4){
-            return true;
-        }
+	/**
+	 * Moves a piece into the desired column
+	 * @param col column number for move.
+	 * @return the row it was placed in
+	 */
+	public void move(int col){
+		Move m = prepMove(col);
+		if (m != null){
+			gb[m.getRow()][m.getCol()] = getTurn();
+			totalMoves++;
+			lastMove = m;
+			winnerFound = checkWinner(m.getCol(), m.getRow());//checking if somebody won
+			if (!winnerFound) {
+				setTurn(turn == 2 ? 1 : 2);//switching the turn if nobody won
+			}
+		}
+	}
 
-        chainLeft = 1;
-        return false;
-    }
+	/**
+	 * Move method for the AI that calls the getBestMove() method with the AIPlayer instance 'ai'.
+	 * @param player the player number you want the move to be for. 1 for player 1, 2 for player 2.
+	 */
+	public void moveAI(int player){
+		Move m = ai.getBestMove();
+		if (m != null){
+			gb[m.getRow()][m.getCol()] = player;
+			totalMoves++;
+			lastMove = m;
+			winnerFound = checkWinner(m.getCol(), m.getRow());
+			if (!winnerFound) {
+				setTurn(turn ==  2 ? 1 : 2);
+			}
+		}
+		//end method because a piece has been placed
+	}
 
-    public boolean isValidMove(int y, int x){
-        if (y < gb.length && x < gb[0].length){
-            if (y >= 0 && x >= 0){
-                return true;
-            }
-        }
-        return false;
-    }
+	/**
+	 * Really a simplified version of the move method with no win-checking
+	 * coordinate validation is taken care of by the prepMove method before passing
+	 * the move into testMove
+	 * @param m the Move object with coordinates for the move. Should be a move generated by
+	 *          the prepMove method.
+	 * @param player the player number you want the move to be for. 1 for player 1, 2 for player 2.
+	 */
+	public void testMove(Move m, int player){
+		gb[m.getRow()][m.getCol()] = player;
+		totalMoves++;
+	}
 
-    @Override
-    public String toString(){
-        String returnString = "";
-        for (int i = 0; i < gb[0].length; i++){
-            returnString += "   " + i;
-        }
-        returnString += "\n";
-        for (int i = 0; i < gb.length; i++){
-            returnString += i + "  ";
-            for (int j = 0; j < gb[i].length; j++){
-                returnString += gb[i][j] + "   ";
-            }
-            returnString += "\n";
-        }
+	/**
+	 * Undoes a move on the gameboard using the Move object passed in. Will set the space back to 0
+	 * on the gameboard.
+	 * @param m the Move object with coordinates that you want to undo.
+	 */
+	public void undoMove(Move m){
+		this.gb[m.getRow()][m.getCol()] = 0;
+		winnerFound = false;
+		totalMoves--;
+	}
 
-        return returnString;
-    }
+	/**
+	 * Finds the first empty row for the column that gets passed in.
+	 * @param col The column that you want to find the first empty row in
+	 * @return Move object with col parameter and first empty row. Returns null object if no
+	 * valid row is found.
+	 */
+	public Move prepMove(int col){
+		for (int row = 0; row < gb.length; row++) {
+			if(this.gb[row][col] == 0 && row < this.gb.length){
+				return new Move(row, col);
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Generates an arraylist of Move objects for all possible moves given the current
+	 * state of the gameboard. All moves are validated by the prepMove method before being
+	 * added.
+	 * @return ArrayList of Move objects
+	 */
+	public ArrayList<Move> makeTestMoves(){
+		ArrayList<Move> testMoves = new ArrayList<>();
+		for (int col = 0; col < gb[0].length; col++){
+			Move m = prepMove(col);
+			if (m != null){
+				testMoves.add(m);
+			}
+		}
+		return testMoves;
+	}
+
+	/**
+	 * Sets all spaces back to zero on the gameboard, and sets the turn back to 1.
+	 */
+	public void clear(){
+		for (int row = 0; row < gb.length; row++){
+			for (int col = 0; col < gb[0].length; col++){
+				gb[row][col] = 0;
+			}
+		}
+		turn = 1;
+		totalMoves = 0;
+	}
+	@Override
+	public String toString() {
+		StringBuilder returnString = new StringBuilder();
+		
+		for (int row = gb.length - 1; row >= 0; row--) {
+			returnString.append(row).append("  ");
+			for (int col = 0; col < gb.length; col++) {
+				returnString.append(gb[row][col]).append("   ");
+			}
+			returnString.append("\n");
+		}
+		for (int i = 0; i <= gb.length; i++) {
+			returnString.append("   ").append(i);
+		}
+
+		return returnString.toString();
+	}
+	/**
+	 * Checks to see if a win has happened
+	 * @param column the column of the placed piece
+	 * @param row the row of the placed piece
+	 * @return true if a win is found, false otherwise
+	 */
+	public boolean checkWinner(int column, int row) {
+		//progress variable tracking win progress for possible win branches
+		int progress = 0;
+
+		if (totalMoves >= 42){	//checks if gameboard is full and returns false right away if it is.
+			setTurn(3);
+			return false;
+		}
+		for(int i=1; i<4; i++) {	//check vertical
+			if(getPiece(column, row-i)==turn) {
+				progress++;
+			}else {
+				break;
+			}
+		}
+		if(progress > 2) {	//check for win
+			return true;
+		}else {	//reset tracker variable
+			progress = 0;
+		}
+		//diagonals
+		for(int i=3; i>0; i--) {	//check diagonal up-left
+			if(getPiece(column-i, row+i)==turn) {
+				progress++;
+			}else {
+				progress = 0;
+			}
+		}
+		for(int i=1; i<4; i++) {	//check diagonal down-right
+			if(getPiece(column+i, row-i)==turn) {
+				progress++;
+			}else {
+				break;
+			}
+		}
+		if(progress > 2) {	//check for win
+			return true;
+		}else {	//reset tracker variable
+			progress = 0;
+		}
+		for(int i=3; i>0; i--) {	//check diagonal up-right
+			if(getPiece(column+i, row+i)==turn) {
+				progress++;
+			}else {
+				progress=0;
+			}
+		}
+		for(int i=1; i<4; i++) {	//check diagonal down-left
+			if(getPiece(column-i, row-i)==turn) {
+				progress++;
+			}else {
+				break;
+			}
+		}
+		if(progress > 2) {//check for win
+			return true;
+		}else {//reset tracker variable
+			progress = 0;
+		}
+		//horizontals
+		for(int i=3; i>0; i--) {//check horizontal-left
+			if(getPiece(column+i, row)==turn) {//left
+				progress++;
+			}else {
+				progress = 0;
+			}
+		}
+		for(int i=1; i<4; i++) {//check horizontal-right
+			if(getPiece(column-i, row)==turn) {
+				progress++;
+			}else {
+				break;
+			}
+		}
+		if(progress > 2) {//check for win
+			return true;
+		}
+		//no win found
+		return false;
+	}
+}
+
+/**
+ * Move class that has row and column attributes, along with getters for retrieving them.
+ * Holds the coordinates for moves on the gameboard.
+ */
+class Move{
+	private int row, col;
+	public Move(int row, int col){
+		this.row = row;
+		this.col = col;
+	}
+	public int getRow(){
+		return row;
+	}
+	public int getCol(){
+		return col;
+	}
 }
