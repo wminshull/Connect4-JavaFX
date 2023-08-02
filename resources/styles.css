@@ -1,0 +1,45 @@
+#rootGridPane{
+    -fx-background-color: "040a82";
+    -fx-font-size: 40;
+}
+
+#borderPane{
+    -fx-font-family: AmazDooMRight;
+    -fx-font-size: 60;
+}
+.toggle-button{
+    -fx-font-family: AmazDooMRight;
+    -fx-font-size: 60;
+    -fx-background-color: linear-gradient(to bottom, darkred, firebrick);
+    -fx-text-fill: linear-gradient(to bottom, chocolate, orange);
+    -fx-border-color: darkred;
+    -fx-border-width: 1;
+}
+.toggle-button:selected{
+    -fx-font-family: AmazDooMRight;
+    -fx-font-size: 60;
+    -fx-background-color: linear-gradient(to top, orangered, darkred);
+    -fx-text-fill: linear-gradient(to bottom, chocolate, orange);
+    -fx-border-color: darkred;
+    -fx-border-width: 1;
+}
+.toggle-button:hover{
+    -fx-background-color: linear-gradient(to top, orangered, darkred);
+}
+.toggle-button:pressed{
+    -fx-background-color: orangered;
+}
+#bottomButton{
+    -fx-font-family: AmazDooMRight;
+    -fx-font-size: 60;
+    -fx-background-color: linear-gradient(to bottom, darkred, firebrick);
+    -fx-text-fill: linear-gradient(to bottom, chocolate, orange);
+    -fx-border-color: darkred;
+    -fx-border-width: 1;
+}
+#bottomButton:hover{
+    -fx-background-color: linear-gradient(to top, orangered, darkred);
+}
+#bottomButton:pressed{
+    -fx-background-color: orangered;
+}
